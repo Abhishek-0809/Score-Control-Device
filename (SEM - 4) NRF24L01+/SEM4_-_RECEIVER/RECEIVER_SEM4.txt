@@ -1,0 +1,228 @@
+
+//RECEIVER
+
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+#include <LedControl.h>
+
+
+int DIN = 5;
+int CS =  6;
+int CLK = 7;
+
+RF24 radio(8, 9);
+const byte address[6] = "00001";
+boolean button_state = 0;
+int led_pin = PC10;
+
+
+byte zero[8] = {0x00, 0xEE, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xEE};
+byte one[8] = {0x00, 0xE4, 0xAC, 0xA4, 0xA4, 0xA4, 0xA4, 0xEE};
+byte two[8] = {0x00, 0xEE, 0xA2, 0xA2, 0xAE, 0xA8, 0xA8, 0xEE};
+byte three[8] = {0x00, 0xEE, 0xA2, 0xA2, 0xAE, 0xA2, 0xA2, 0xEE};
+byte four[8] = {0x00, 0xE2, 0xA6, 0xAA, 0xAF, 0xA2, 0xA2, 0xE2};
+byte five[8] = {0x00, 0xEE, 0xA8, 0xA8, 0xAE, 0xA2, 0xA2, 0xEE};
+byte six[8] = {0x00, 0xEE, 0xA8, 0xA8, 0xAE, 0xAA, 0xAA, 0xEE};
+byte seven[8] = {0x00, 0xEE, 0xA2, 0xA2, 0xA2, 0xA2, 0xA2, 0xE2};
+byte eight[8] = {0x00, 0xEE, 0xAA, 0xAA, 0xAE, 0xAA, 0xAA, 0xEE};
+byte nine[8] = {0x00, 0xEE, 0xAA, 0xAA, 0xAE, 0xA2, 0xA2, 0xEE};
+byte ten[8] = {0x00, 0x4E, 0xCA, 0x4A, 0x4A, 0x4A, 0x4A, 0xEE};
+byte eleven[8] = {0x00, 0x44, 0xCC, 0x44, 0x44, 0x44, 0x44, 0xEE};
+byte twelve[8] = {0x00, 0x4E, 0xC2, 0x42, 0x4E, 0x48, 0x48, 0xEE};
+byte thirteen[8] = {0x00, 0x4E, 0xC2, 0x42, 0x4E, 0x42, 0x42, 0xEE};
+byte fourteen[8] = {0x00, 0x42, 0xC6, 0x4A, 0x4F, 0x42, 0x42, 0xE2};
+byte fifteen[8] = {0x00, 0x4E, 0xC8, 0x48, 0x4E, 0x42, 0x42, 0xEE};
+byte sixteen[8] = {0x00, 0x4E, 0xC8, 0x48, 0x4E, 0x4A, 0x4A, 0xEE};
+byte seventeen[8] = {0x00, 0x4E, 0xC2, 0x42, 0x42, 0x42, 0x42, 0xE2};
+byte eighteen[8] = {0x00, 0x4E, 0xCA, 0x4A, 0x4E, 0x4A, 0x4A, 0xEE};
+byte nineteen[8] = {0x00, 0x4E, 0xCA, 0x4A, 0x4E, 0x42, 0x42, 0xEE};
+byte twenty[8] = {0x00, 0xEE, 0x2A, 0x2A, 0xEA, 0x8A, 0x8A, 0xEE};
+byte twentyone[8] = {0x00, 0xE4, 0x2C, 0x24, 0xE4, 0x84, 0x84, 0xEE};
+
+LedControl lc = LedControl(DIN, CLK, CS, 0);
+
+
+
+void setup()
+{
+
+  lc.shutdown(0, false);      //The MAX72XX is in power-saving mode on startup
+  lc.setIntensity(0, 1);     // Set the brightness to maximum value
+  lc.clearDisplay(0);         // and clear the display
+  pinMode(DIN, OUTPUT);
+
+  pinMode(led_pin, OUTPUT);
+  Serial.begin(9600);
+  radio.begin();
+  radio.openReadingPipe(0, address);
+  radio.setPALevel(RF24_PA_MIN);
+  radio.startListening();
+}
+
+
+int count = 0;
+void loop()
+{
+  if (radio.available())
+  {
+    char text[32] = "";
+    radio.read(&text, sizeof(text));
+    radio.read(&button_state, sizeof(button_state));
+    if (button_state == HIGH)
+    {
+      count = count + 1;
+      printDigits();
+      digitalWrite(led_pin, HIGH);
+      Serial.println(text);
+    }
+    if (count == 22) {
+      count = 0;
+    }
+
+    else
+    {
+      printDigits();
+      digitalWrite(led_pin, LOW);
+      Serial.println(text);
+    }
+  }
+  delay(200);
+}
+
+
+void printDigits()
+
+{
+
+  switch (count) {
+
+    case 1:
+      printByte(one);
+      delay(100);
+      break;
+
+    case 2:
+      printByte(two);
+      delay(100);
+      break;
+
+    case 3:
+      printByte(three);
+      delay(100);
+      break;
+
+    case 4:
+      printByte(four);
+      delay(100);
+      break;
+
+    case 5:
+      printByte(five);
+      delay(100);
+      break;
+
+    case 6:
+      printByte(six);
+      delay(100);
+      break;
+
+    case 7:
+      printByte(seven);
+      delay(100);
+      break;
+
+    case 8:
+      printByte(eight);
+      delay(100);
+      break;
+
+    case 9:
+      printByte(nine);
+      delay(100);
+      break;
+
+    case 10:
+      printByte(ten);
+      delay(100);
+      break;
+
+    case 11:
+      printByte(eleven);
+      delay(100);
+      break;
+
+    case 12:
+      printByte(twelve);
+      delay(100);
+      break;
+
+    case 13:
+      printByte(thirteen);
+      delay(100);
+      break;
+
+    case 14:
+      printByte(fourteen);
+      delay(100);
+      break;
+
+    case 15:
+      printByte(fifteen);
+      delay(100);
+      break;
+
+    case 16:
+      printByte(sixteen);
+      delay(100);
+      break;
+
+    case 17:
+      printByte(seventeen);
+      delay(100);
+      break;
+
+    case 18:
+      printByte(eighteen);
+      delay(100);
+      break;
+
+    case 19:
+      printByte(nineteen);
+      delay(100);
+      break;
+
+    case 20:
+      printByte(twenty);
+      delay(100);
+      break;
+
+    case 21:
+      printByte(twentyone);
+      delay(100);
+      break;
+
+
+
+    default:
+      printByte(zero);
+      break;
+  }
+
+}
+
+void printByte(byte character [])
+
+{
+
+  int i = 0;
+
+  for (i = 0; i < 8; i++)
+
+  {
+
+    lc.setRow(0, i, character[i]);
+
+  }
+
+}
